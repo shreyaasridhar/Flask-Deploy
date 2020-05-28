@@ -19,10 +19,15 @@ phases:
         - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URI:$TAG"'@' simple_jwt_api.yml
         - $(aws ecr get-login --no-include-email)
         - export KUBECONFIG=$HOME/.kube/config
-        # Following the suggestion from https://stackoverflow.com/questions/39129450/what-is-the-correct-format-to-upgrade-pip3-when-the-default-pip-is-pip2
-        - python3 -m pip install --upgrade pip
-        - python3 -m pip install -r requirements.txt
-        - python3 test_main.py
+        - apt-get -y remove python3.4 python3-dev
+        - apt-get update
+        - apt-get -y install software-properties-common
+        - add-apt-repository ppa:deadsnakes/ppa
+        - apt-get -y install python3.5 python3.5-dev jq
+        - curl https://bootstrap.pypa.io/ez_setup.py -o - | python3.5
+        - easy_install pip
+        - pip3 install --upgrade awscli
+        - ln -sf /usr/bin/python3.5 /usr/local/bin/python3
   build:
     commands:
       - docker build --tag $REPOSITORY_URI:$TAG .
